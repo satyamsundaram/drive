@@ -42,14 +42,21 @@ class StorageService {
   async uploadToCloudinary(file) {
     try {
       const uniqueId = uuidv4();
-      const publicId = `${config.storage.cloudinary.folder}/${uniqueId}`;
 
-      const result = await cloudinary.uploader.upload(file.buffer, {
-        public_id: publicId,
-        resource_type: 'auto', // Automatically detect file type
-        folder: config.storage.cloudinary.folder,
-        use_filename: false,
-        unique_filename: true
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({
+          public_id: uniqueId, // Just the UUID, no folder prefix
+          resource_type: 'auto', // Automatically detect file type
+          folder: config.storage.cloudinary.folder,
+          use_filename: false,
+          unique_filename: true,
+          type: 'upload', // Make it publicly accessible
+          access_mode: 'public', // Ensure public access
+          overwrite: false // Don't overwrite existing files
+        }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }).end(file.buffer);
       });
 
       return {
@@ -163,6 +170,8 @@ class StorageService {
    */
   getDownloadUrl(metadata) {
     if (metadata.storageType === 'cloudinary') {
+      // Always use the URL from upload result - it's the most reliable
+      console.log('Using stored Cloudinary URL:', metadata.url);
       return metadata.url;
     } else {
       return `/api/files/${metadata.id}`;
