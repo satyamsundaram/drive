@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Service</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 File Upload Service</h1>
+            <p>Simple, secure file uploads with progress tracking</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📤</div>
+                        <h3>Drop files here or click to browse</h3>
+                        <p>Supports: Images, PDFs, Documents, Text files</p>
+                        <p class="file-limit">Max size: 10MB</p>
+                        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx" hidden>
+                        <button type="button" class="browse-btn" id="browseBtn">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Progress -->
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <!-- Upload Status -->
+                <div class="status-message" id="statusMessage"></div>
+            </section>
+
+            <!-- File List Section -->
+            <section class="files-section">
+                <div class="section-header">
+                    <h2>📋 Uploaded Files</h2>
+                    <button type="button" class="refresh-btn" id="refreshBtn">
+                        🔄 Refresh
+                    </button>
+                </div>
+                
+                <div class="files-container" id="filesContainer">
+                    <div class="loading" id="loadingFiles">Loading files...</div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with ❤️ using Node.js, Express, and vanilla JavaScript</p>
+        </footer>
+    </div>
+
+    <!-- File Info Modal -->
+    <div class="modal" id="fileModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>File Information</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- File details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
