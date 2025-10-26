@@ -16,7 +16,8 @@ const {
   saveFileMetadata,
   loadFileMetadata,
   deleteFileAndMetadata,
-  getAllFileMetadata
+  getAllFileMetadata,
+  getFileMetadataFromCloudinaryById
 } = require('../utils/fileUtils');
 
 const router = express.Router();

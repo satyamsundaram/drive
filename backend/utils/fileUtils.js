@@ -117,6 +117,15 @@ async function saveFileMetadata(metadata) {
  */
 async function loadFileMetadata(fileId) {
   try {
+    // If using cloud storage, try to get from Cloudinary first
+    if (config.storage.type === 'cloudinary') {
+      const cloudMetadata = await getFileMetadataFromCloudinaryById(fileId);
+      if (cloudMetadata) {
+        return cloudMetadata;
+      }
+    }
+    
+    // Fallback to local metadata files
     const metadataPath = path.join(config.storage.metadataDir, `${fileId}.json`);
     const metadataContent = await fs.readFile(metadataPath, 'utf8');
     return JSON.parse(metadataContent);
@@ -169,6 +178,12 @@ async function deleteFileAndMetadata(fileId) {
  */
 async function getAllFileMetadata() {
   try {
+    // If using cloud storage, fetch from Cloudinary
+    if (config.storage.type === 'cloudinary') {
+      return await getAllFileMetadataFromCloudinary();
+    }
+    
+    // Otherwise, use local metadata files
     await ensureDirectoryExists(config.storage.metadataDir);
     const files = await fs.readdir(config.storage.metadataDir);
     const metadataFiles = files.filter(file => file.endsWith('.json'));
@@ -193,6 +208,103 @@ async function getAllFileMetadata() {
   }
 }
 
+/**
+ * Get all file metadata from Cloudinary
+ * @returns {array} - Array of file metadata objects
+ */
+async function getAllFileMetadataFromCloudinary() {
+  try {
+    const cloudinary = require('cloudinary').v2;
+    
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: config.storage.cloudinary.cloud_name,
+      api_key: config.storage.cloudinary.api_key,
+      api_secret: config.storage.cloudinary.api_secret
+    });
+    
+    // Get all resources from the folder
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: config.storage.cloudinary.folder,
+      max_results: 500 // Adjust as needed
+    });
+    
+    // Transform Cloudinary resources to our metadata format
+    const metadata = result.resources.map(resource => ({
+      id: resource.public_id.split('/').pop(), // Extract filename as ID
+      originalName: resource.original_filename || resource.public_id.split('/').pop(),
+      fileName: resource.public_id.split('/').pop(),
+      mimeType: resource.resource_type === 'image' ? `image/${resource.format}` : resource.resource_type,
+      size: resource.bytes,
+      uploadDate: resource.created_at,
+      url: resource.secure_url,
+      publicId: resource.public_id,
+      format: resource.format,
+      width: resource.width,
+      height: resource.height,
+      storageType: 'cloudinary' // Add storage type for consistency
+    }));
+    
+    // Sort by upload date (newest first)
+    return metadata.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+  } catch (error) {
+    console.error('Error getting file metadata from Cloudinary:', error);
+    return [];
+  }
+}
+
+/**
+ * Get file metadata by ID from Cloudinary
+ * @param {string} fileId - File ID
+ * @returns {object|null} - File metadata or null if not found
+ */
+async function getFileMetadataFromCloudinaryById(fileId) {
+  try {
+    const cloudinary = require('cloudinary').v2;
+    
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: config.storage.cloudinary.cloud_name,
+      api_key: config.storage.cloudinary.api_key,
+      api_secret: config.storage.cloudinary.api_secret
+    });
+    
+    // Get all resources from the folder
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: config.storage.cloudinary.folder,
+      max_results: 500
+    });
+    
+    // Find the resource with matching ID
+    const resource = result.resources.find(r => r.public_id.split('/').pop() === fileId);
+    
+    if (!resource) {
+      return null;
+    }
+    
+    // Transform to our metadata format
+    return {
+      id: resource.public_id.split('/').pop(),
+      originalName: resource.original_filename || resource.public_id.split('/').pop(),
+      fileName: resource.public_id.split('/').pop(),
+      mimeType: resource.resource_type === 'image' ? `image/${resource.format}` : resource.resource_type,
+      size: resource.bytes,
+      uploadDate: resource.created_at,
+      url: resource.secure_url,
+      publicId: resource.public_id,
+      format: resource.format,
+      width: resource.width,
+      height: resource.height,
+      storageType: 'cloudinary'
+    };
+  } catch (error) {
+    console.error('Error getting file metadata from Cloudinary by ID:', error);
+    return null;
+  }
+}
+
 module.exports = {
   generateUniqueFilename,
   generateFilePath,
@@ -203,5 +315,6 @@ module.exports = {
   saveFileMetadata,
   loadFileMetadata,
   deleteFileAndMetadata,
-  getAllFileMetadata
+  getAllFileMetadata,
+  getFileMetadataFromCloudinaryById
 };
