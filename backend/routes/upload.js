@@ -57,8 +57,10 @@ router.post('/upload', async (req, res, next) => {
           // Upload file using storage service
           const metadata = await storageService.uploadFile(file);
           
-          // Save metadata to JSON file (for both local and cloud)
-          await saveFileMetadata(metadata);
+          // Save metadata to JSON file only for local storage
+          if (config.storage.type === 'local') {
+            await saveFileMetadata(metadata);
+          }
           
           // Return success response with file information
           res.status(201).json({
@@ -264,14 +266,17 @@ router.delete('/files/:id', async (req, res) => {
     // Delete file using storage service
     const fileDeleted = await storageService.deleteFile(metadata);
     
-    // Delete metadata file
-    const metadataPath = path.join(config.storage.metadataDir, `${fileId}.json`);
-    let metadataDeleted = false;
-    try {
-      await fs.unlink(metadataPath);
-      metadataDeleted = true;
-    } catch (error) {
-      console.error('Error deleting metadata file:', error);
+    // Only delete local metadata file if using local storage
+    let metadataDeleted = true; // Default to true for cloud storage
+    if (config.storage.type === 'local') {
+      const metadataPath = path.join(config.storage.metadataDir, `${fileId}.json`);
+      try {
+        await fs.unlink(metadataPath);
+        metadataDeleted = true;
+      } catch (error) {
+        console.error('Error deleting metadata file:', error);
+        metadataDeleted = false;
+      }
     }
     
     if (fileDeleted && metadataDeleted) {

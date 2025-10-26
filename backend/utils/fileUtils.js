@@ -227,24 +227,44 @@ async function getAllFileMetadataFromCloudinary() {
     const result = await cloudinary.api.resources({
       type: 'upload',
       prefix: config.storage.cloudinary.folder,
-      max_results: 500 // Adjust as needed
+      max_results: 500, // Adjust as needed
+      context: true // Include context data
     });
     
     // Transform Cloudinary resources to our metadata format
-    const metadata = result.resources.map(resource => ({
-      id: resource.public_id.split('/').pop(), // Extract filename as ID
-      originalName: resource.original_filename || resource.public_id.split('/').pop(),
-      fileName: resource.public_id.split('/').pop(),
-      mimeType: resource.resource_type === 'image' ? `image/${resource.format}` : resource.resource_type,
-      size: resource.bytes,
-      uploadDate: resource.created_at,
-      url: resource.secure_url,
-      publicId: resource.public_id,
-      format: resource.format,
-      width: resource.width,
-      height: resource.height,
-      storageType: 'cloudinary' // Add storage type for consistency
-    }));
+    const metadata = result.resources.map(resource => {
+      // Extract original filename from context or tags
+      let originalName = resource.public_id.split('/').pop(); // fallback
+      
+      if (resource.context?.custom?.original_filename) {
+        originalName = resource.context.custom.original_filename;
+      } else if (resource.context?.original_filename) {
+        originalName = resource.context.original_filename;
+      } else if (resource.original_filename) {
+        originalName = resource.original_filename;
+      } else if (resource.tags) {
+        // Look for original_name tag
+        const originalNameTag = resource.tags.find(tag => tag.startsWith('original_name:'));
+        if (originalNameTag) {
+          originalName = originalNameTag.replace('original_name:', '');
+        }
+      }
+      
+      return {
+        id: resource.public_id.split('/').pop(), // Extract filename as ID
+        originalName: originalName,
+        fileName: resource.public_id.split('/').pop(),
+        mimeType: resource.resource_type === 'image' ? `image/${resource.format}` : resource.resource_type,
+        size: resource.bytes,
+        uploadDate: resource.created_at,
+        url: resource.secure_url,
+        publicId: resource.public_id,
+        format: resource.format,
+        width: resource.width,
+        height: resource.height,
+        storageType: 'cloudinary' // Add storage type for consistency
+      };
+    });
     
     // Sort by upload date (newest first)
     return metadata.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
@@ -274,7 +294,8 @@ async function getFileMetadataFromCloudinaryById(fileId) {
     const result = await cloudinary.api.resources({
       type: 'upload',
       prefix: config.storage.cloudinary.folder,
-      max_results: 500
+      max_results: 500,
+      context: true // Include context data
     });
     
     // Find the resource with matching ID
@@ -284,10 +305,27 @@ async function getFileMetadataFromCloudinaryById(fileId) {
       return null;
     }
     
+    // Extract original filename from context or tags
+    let originalName = resource.public_id.split('/').pop(); // fallback
+    
+    if (resource.context?.custom?.original_filename) {
+      originalName = resource.context.custom.original_filename;
+    } else if (resource.context?.original_filename) {
+      originalName = resource.context.original_filename;
+    } else if (resource.original_filename) {
+      originalName = resource.original_filename;
+    } else if (resource.tags) {
+      // Look for original_name tag
+      const originalNameTag = resource.tags.find(tag => tag.startsWith('original_name:'));
+      if (originalNameTag) {
+        originalName = originalNameTag.replace('original_name:', '');
+      }
+    }
+    
     // Transform to our metadata format
     return {
       id: resource.public_id.split('/').pop(),
-      originalName: resource.original_filename || resource.public_id.split('/').pop(),
+      originalName: originalName,
       fileName: resource.public_id.split('/').pop(),
       mimeType: resource.resource_type === 'image' ? `image/${resource.format}` : resource.resource_type,
       size: resource.bytes,

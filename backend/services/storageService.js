@@ -52,7 +52,11 @@ class StorageService {
           unique_filename: true,
           type: 'upload', // Make it publicly accessible
           access_mode: 'public', // Ensure public access
-          overwrite: false // Don't overwrite existing files
+          overwrite: false, // Don't overwrite existing files
+          context: {
+            original_filename: file.originalname // Store original filename in context
+          },
+          // We already store original filename in context, no need for redundant tag
         }, (error, result) => {
           if (error) reject(error);
           else resolve(result);
