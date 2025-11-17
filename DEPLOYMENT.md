@@ -131,7 +131,7 @@ Once deployed, you can:
 
 ### Production Security
 - ✅ **File validation**: Only allowed file types
-- ✅ **Size limits**: 10MB maximum
+- ✅ **Size limits**: 50MB maximum
 - ✅ **CORS protection**: Configured for your domain
 - ✅ **Cloud storage**: Files stored securely in Cloudinary
 

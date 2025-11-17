@@ -126,7 +126,7 @@ uploads/
 
 ### File Upload Security
 - **File Type Validation**: Check MIME type and file extension
-- **Size Limits**: Maximum file size (e.g., 10MB for MVP)
+- **Size Limits**: Maximum file size (e.g., 50MB for MVP)
 - **Virus Scanning**: Future enhancement
 - **Content Validation**: Check file headers match extension
 
@@ -228,7 +228,7 @@ uploads/
 ### Configuration
 - **Port**: Default 3000, configurable via environment
 - **Upload Directory**: Default `./uploads`
-- **File Size Limit**: Default 10MB
+- **File Size Limit**: Default 50MB
 - **Allowed Types**: Configurable whitelist
 
 This technical documentation provides the foundation for building a robust file upload service. We'll implement this step by step, starting with the MVP features and gradually adding more sophisticated functionality.

@@ -26,7 +26,7 @@ async function setup() {
   const env = {
     NODE_ENV: 'development',
     PORT: '3000',
-    MAX_FILE_SIZE: '10485760',
+    MAX_FILE_SIZE: '52428800',
     UPLOAD_DIR: './uploads',
     ALLOWED_FILE_TYPES: 'image/jpeg,image/png,image/gif,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     STORAGE_TYPE: 'local',

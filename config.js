@@ -12,7 +12,7 @@ module.exports = {
 
   // File upload configuration
   upload: {
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
+    maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 50 * 1024 * 1024, // 50MB default
     uploadDir: process.env.UPLOAD_DIR || './uploads',
     allowedTypes: (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,application/pdf,text/plain').split(','),
     

@@ -108,10 +108,10 @@ class FileUploadService {
      * @param {File} file - Selected file
      */
     handleFileSelect(file) {
-        // Validate file size (10MB limit)
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        // Validate file size (50MB limit)
+        const maxSize = 50 * 1024 * 1024; // 50MB
         if (file.size > maxSize) {
-            this.showStatus('File size must be less than 10MB', 'error');
+            this.showStatus('File size must be less than 50MB', 'error');
             return;
         }
 

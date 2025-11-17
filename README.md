@@ -16,7 +16,7 @@ A simple, secure file upload service built with Node.js, Express, and vanilla Ja
 - Images: JPEG, PNG, GIF
 - Documents: PDF, DOC, DOCX
 - Text: TXT files
-- Maximum file size: 10MB
+- Maximum file size: 50MB
 
 ## Quick Start
 
